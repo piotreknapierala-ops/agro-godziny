@@ -70,7 +70,7 @@ function makeBlankRows(){
   for(const e of employees.filter(x=>x.active)){
     for(let d=1;d<=days;d++){
       const date=dateKey(y,m,d);
-      rows.push({id:`${canonical(e.name)}|${date}`,date,employee:e.name,category:e.category,start:null,stop:null,work:null,ot50:null,ot100:null,absence:"",source:e.mode==="manual"?"manual":"prodio",edited:false,rawHits:0});
+      rows.push({id:`${canonical(e.name)}|${date}`,date,employee:e.name,category:e.category,start:null,stop:null,prodioStart:null,prodioStop:null,work:null,ot50:null,ot100:null,absence:"",source:e.mode==="manual"?"manual":"prodio",edited:false,rawHits:0});
     }
   }
   return rows;
@@ -83,7 +83,7 @@ function syncRowsWithEmployees(){
   for(const e of employees.filter(x=>x.active)){
     for(let d=1;d<=days;d++){
       const date=dateKey(y,m,d), key=`${canonical(e.name)}|${date}`; const r=old.get(key);
-      next.push(r ? {...r,employee:e.name,category:e.category} : {id:key,date,employee:e.name,category:e.category,start:null,stop:null,work:null,ot50:null,ot100:null,absence:"",source:e.mode==="manual"?"manual":"prodio",edited:false,rawHits:0});
+      next.push(r ? {...r,employee:e.name,category:e.category} : {id:key,date,employee:e.name,category:e.category,start:null,stop:null,prodioStart:null,prodioStop:null,work:null,ot50:null,ot100:null,absence:"",source:e.mode==="manual"?"manual":"prodio",edited:false,rawHits:0});
     }
   }
   state.rows=next; state.month=`${y}-${pad(m)}`; state.rows.forEach(recalcRow); saveAll(); renderAll();
@@ -310,7 +310,8 @@ function processRecords(records,sourceName=""){
     if(g.starts.length) r.start=Math.min(...g.starts);
     if(g.stops.length) r.stop=Math.max(...g.stops);
     if(cfg.edgeRound){ if(r.start!==null) r.start=roundUp(r.start,cfg.edgeRound); if(r.stop!==null) r.stop=roundUp(r.stop,cfg.edgeRound); }
-    r.rawHits=g.hits; r.source="prodio"; recalcRow(r);
+    r.prodioStart=r.start; r.prodioStop=r.stop;
+    r.rawHits=g.hits; r.source="prodio"; r.edited=false; recalcRow(r);
   }
   // Carry forward manual edits/absences from the same month.
   for(const [key,old] of previous){ const r=byKey.get(key); if(!r) continue; if(old.edited||old.source==="manual"){r.start=old.start;r.stop=old.stop;r.edited=old.edited;r.source=old.source;} if(old.absence)r.absence=old.absence; recalcRow(r); }
@@ -349,6 +350,10 @@ function renderFilters(){
 }
 function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch])); }
 function absenceOptions(selected){ return `<option value="">—</option>`+ABSENCE_CODES.map(x=>`<option value="${escapeHtml(x.code)}" ${x.code===selected?"selected":""}>${escapeHtml(x.code)} — ${escapeHtml(x.label)}</option>`).join(""); }
+function nudgeButtons(field,value){
+  if(value===null||value===undefined) return `<div class="nudge-row placeholder">wpisz godzinę</div>`;
+  return `<div class="nudge-row" aria-label="Korekta ${field==='start'?'Start':'Stop'}">${[-15,-10,-5,5,10,15].map(d=>`<button type="button" class="nudge-btn ${d<0?'minus':'plus'}" data-field="${field}" data-delta="${d}" title="${d>0?'+':''}${d} min">${d>0?'+':''}${d}</button>`).join('')}</div>`;
+}
 function renderRecords(){
   const cat=$("#filterCategory").value||"ALL", emp=$("#filterEmployee").value||"ALL", view=$("#filterRows").value||"used";
   let rows=state.rows.filter(r=>(cat==="ALL"||r.category===cat)&&(emp==="ALL"||r.employee===emp));
@@ -357,15 +362,17 @@ function renderRecords(){
   if(view==="absence")rows=rows.filter(r=>r.absence);
   rows.sort((a,b)=>a.date.localeCompare(b.date)||a.employee.localeCompare(b.employee,"pl"));
   $("#recordsTable tbody").innerHTML=rows.map(r=>{
-    const st=statusForRow(r), dt=localDateFromKey(r.date), src=r.edited?"edit":r.source;
+    const st=statusForRow(r), dt=localDateFromKey(r.date), src=r.source||"prodio";
     const srcLabel=src==="prodio"?"Prodio":src==="manual"?"Ręcznie":"Korekta";
+    const restore=src==="edit"&&(r.prodioStart!==null||r.prodioStop!==null)
+      ? `<button type="button" class="restore-prodio" title="Przywróć Start/Stop z Prodio">↺ Prodio</button>`:"";
     return `<tr data-id="${escapeHtml(r.id)}">
       <td>${r.date}</td><td>${dayNames[dt.getDay()]}</td><td><b>${escapeHtml(r.employee)}</b></td><td>${escapeHtml(r.category)}</td>
-      <td><input class="time-input start-input" type="time" step="60" value="${timeToText(r.start)}"></td>
-      <td><input class="time-input stop-input" type="time" step="60" value="${timeToText(r.stop)}"></td>
+      <td><div class="time-edit"><input class="time-input start-input" type="time" step="60" value="${timeToText(r.start)}">${nudgeButtons('start',r.start)}</div></td>
+      <td><div class="time-edit"><input class="time-input stop-input" type="time" step="60" value="${timeToText(r.stop)}">${nudgeButtons('stop',r.stop)}</div></td>
       <td><b>${minutesToText(r.work)}</b></td><td>${minutesToText(r.ot50)}</td><td>${minutesToText(r.ot100)}</td>
       <td><select class="absence-select">${absenceOptions(r.absence)}</select></td>
-      <td><span class="badge badge-${src}">${srcLabel}</span>${r.rawHits?` <small>${r.rawHits} wpis.</small>`:""}</td>
+      <td><span class="badge badge-${src}">${srcLabel}</span>${r.rawHits?` <small>${r.rawHits} wpis.</small>`:""}${restore}</td>
       <td><span class="badge badge-${st.type}">${st.text}</span></td></tr>`;
   }).join("") || `<tr><td colspan="12" class="empty">Brak wpisów dla wybranego filtra.</td></tr>`;
 }
@@ -384,12 +391,45 @@ function renderEmployees(){
 }
 function renderAll(){ renderStats(); renderFilters(); renderRecords(); renderSummary(); renderEmployees(); }
 
+function markRowSourceForEdit(r){
+  const cfg=employeeByName(r.employee);
+  if(cfg?.mode==="manual"){
+    r.source="manual"; r.edited=false;
+  } else {
+    if(r.prodioStart===undefined||r.prodioStart===null) r.prodioStart=r.start;
+    if(r.prodioStop===undefined||r.prodioStop===null) r.prodioStop=r.stop;
+    r.source="edit"; r.edited=true;
+  }
+}
 function updateRowFromTr(tr){
-  const r=state.rows.find(x=>x.id===tr.dataset.id); if(!r)return; r.start=textToMinutes(tr.querySelector(".start-input").value); r.stop=textToMinutes(tr.querySelector(".stop-input").value); r.absence=tr.querySelector(".absence-select").value; r.edited=true; r.source="edit"; recalcRow(r); saveAll(); renderRecords(); renderSummary(); renderStats();
+  const r=state.rows.find(x=>x.id===tr.dataset.id); if(!r)return;
+  markRowSourceForEdit(r);
+  r.start=textToMinutes(tr.querySelector(".start-input").value);
+  r.stop=textToMinutes(tr.querySelector(".stop-input").value);
+  r.absence=tr.querySelector(".absence-select").value;
+  recalcRow(r); saveAll(); renderRecords(); renderSummary(); renderStats();
+}
+function nudgeRow(tr,field,delta){
+  const r=state.rows.find(x=>x.id===tr.dataset.id); if(!r)return;
+  const key=field==="start"?"start":"stop";
+  if(r[key]===null||r[key]===undefined){ setStatus(`Najpierw wpisz godzinę ${field==="start"?"Start":"Stop"}.`,"warn"); return; }
+  markRowSourceForEdit(r);
+  r[key]=((Math.round(Number(r[key]))+Number(delta))%1440+1440)%1440;
+  recalcRow(r); saveAll(); renderRecords(); renderSummary(); renderStats();
+}
+function restoreProdio(tr){
+  const r=state.rows.find(x=>x.id===tr.dataset.id); if(!r)return;
+  if(r.prodioStart===undefined&&r.prodioStop===undefined) return;
+  r.start=r.prodioStart??null; r.stop=r.prodioStop??null; r.source="prodio"; r.edited=false;
+  recalcRow(r); saveAll(); renderRecords(); renderSummary(); renderStats();
+  setStatus(`Przywrócono godziny Prodio: ${r.employee}, ${r.date}.`);
 }
 function addManualRow(){
-  const emp=$("#filterEmployee").value; const cat=$("#filterCategory").value; let target=emp!=="ALL"?employeeByName(emp):employees.find(e=>e.active&&(cat==="ALL"||e.category===cat)); if(!target){setStatus("Najpierw wybierz pracownika.","warn");return;}
-  $("#filterEmployee").value=target.name; $("#filterRows").value="all"; renderRecords(); switchTab("records");
+  const emp=$("#filterEmployee").value;
+  if(emp==="ALL"){setStatus("Wybierz konkretnego pracownika, któremu chcesz wpisać godziny ręcznie.","warn");return;}
+  const target=employeeByName(emp); if(!target){setStatus("Nie znaleziono pracownika.","warn");return;}
+  $("#filterRows").value="all"; renderRecords(); switchTab("records");
+  setStatus(`Tryb wpisu ręcznego: ${target.name}. Wpisz Start/Stop w wybranym dniu; wynik i nadgodziny przeliczą się automatycznie.`);
 }
 function switchTab(name){ $$(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===name)); $$(".tab-panel").forEach(x=>x.classList.toggle("active",x.id===`tab-${name}`)); if(name==="summary")renderSummary(); }
 
@@ -413,7 +453,7 @@ async function exportExcel(){
   ws=wb.addWorksheet("EWIDENCJA MIESIĄCA",{views:[{state:"frozen",ySplit:1}]});
   ws.addRow(["Data","Dzień","Pracownik","Spółka / dział","Start","Stop","Przepracowano","50%","100%","Nieobecność","Źródło","Status"]); styleHeader(ws.getRow(1));
   const used=state.rows.filter(r=>r.start!==null||r.stop!==null||r.absence).sort((a,b)=>a.date.localeCompare(b.date)||a.employee.localeCompare(b.employee,"pl"));
-  for(const r of used){ const st=statusForRow(r), src=r.edited?"Korekta":r.source==="prodio"?"Prodio":"Ręcznie"; const d=localDateFromKey(r.date); ws.addRow([d,dayNames[d.getDay()],r.employee,r.category,r.start===null?null:r.start/1440,r.stop===null?null:r.stop/1440,r.work===null?null:r.work/1440,r.ot50===null?null:r.ot50/1440,r.ot100===null?null:r.ot100/1440,r.absence,src,st.text]); }
+  for(const r of used){ const st=statusForRow(r), src=r.source==="edit"?"Korekta":r.source==="prodio"?"Prodio":"Ręcznie"; const d=localDateFromKey(r.date); ws.addRow([d,dayNames[d.getDay()],r.employee,r.category,r.start===null?null:r.start/1440,r.stop===null?null:r.stop/1440,r.work===null?null:r.work/1440,r.ot50===null?null:r.ot50/1440,r.ot100===null?null:r.ot100/1440,r.absence,src,st.text]); }
   ws.getColumn(1).numFmt="dd.mm.yyyy"; [5,6].forEach(c=>ws.getColumn(c).numFmt="hh:mm"); [7,8,9].forEach(c=>ws.getColumn(c).numFmt="[h]:mm"); ws.columns.forEach((c,i)=>c.width=[13,14,28,28,10,10,14,11,11,15,12,18][i]); ws.autoFilter={from:"A1",to:"L1"}; setBorders(ws);
 
   ws=wb.addWorksheet("NIEOBECNOŚCI"); ws.addRow(["Data","Pracownik","Spółka / dział","Kod","Opis"]); styleHeader(ws.getRow(1));
@@ -435,10 +475,23 @@ function bind(){
   });
   $("#sunday100").addEventListener("change",()=>{state.sunday100=$("#sunday100").checked;state.rows.forEach(recalcRow);saveAll();renderAll();});
   $("#autoUnknown").addEventListener("change",()=>{state.autoUnknown=$("#autoUnknown").checked;saveAll();});
-  $("#filterCategory").addEventListener("change",()=>{renderFilters();renderRecords();});
-  $("#filterEmployee").addEventListener("change",renderRecords);
+  $("#filterCategory").addEventListener("change",()=>{
+    const c=$("#filterCategory").value;
+    if(c==="MAGAZYN"||c==="SERWIS") $("#filterRows").value="all";
+    renderFilters();renderRecords();
+  });
+  $("#filterEmployee").addEventListener("change",()=>{
+    const e=employeeByName($("#filterEmployee").value);
+    if(e?.mode==="manual") $("#filterRows").value="all";
+    renderRecords();
+  });
   $("#filterRows").addEventListener("change",renderRecords);
-  $("#recordsTable tbody").addEventListener("change",e=>{const tr=e.target.closest("tr[data-id]");if(tr)updateRowFromTr(tr);});
+  $("#recordsTable tbody").addEventListener("change",e=>{const tr=e.target.closest("tr[data-id]");if(tr&&(e.target.matches(".start-input,.stop-input,.absence-select")))updateRowFromTr(tr);});
+  $("#recordsTable tbody").addEventListener("click",e=>{
+    const tr=e.target.closest("tr[data-id]"); if(!tr)return;
+    const n=e.target.closest(".nudge-btn"); if(n){nudgeRow(tr,n.dataset.field,Number(n.dataset.delta));return;}
+    if(e.target.closest(".restore-prodio")){restoreProdio(tr);return;}
+  });
   $("#addManual").addEventListener("click",addManualRow);
   $("#exportTop").addEventListener("click",exportExcel); $("#exportSummary").addEventListener("click",exportExcel);
   $("#processPaste").addEventListener("click",()=>{try{processRecords(parseDelimited($("#pasteInput").value),"wklejone dane");}catch(e){setStatus(e.message,"error");}});
