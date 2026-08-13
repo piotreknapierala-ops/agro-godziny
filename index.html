@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="AGRO Godziny – szybkie rozliczanie czasu pracy z eksportu Prodio" />
-  <title>AGRO Godziny 1.1</title>
-  <link rel="stylesheet" href="style.css?v=1.1.0" />
+  <title>AGRO Godziny 1.2</title>
+  <link rel="stylesheet" href="style.css?v=1.2.0" />
   <script defer src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-  <script defer src="app.js?v=1.1.0"></script>
+  <script defer src="app.js?v=1.2.0"></script>
 </head>
 <body>
   <header class="topbar">
@@ -17,6 +17,9 @@
     </div>
     <div class="top-actions">
       <span id="saveState" class="save-state">● gotowe</span>
+      <button class="btn btn-secondary" id="saveBackup">Zapisz kopię</button>
+      <button class="btn btn-secondary" id="loadBackup">Wczytaj kopię</button>
+      <input type="file" id="backupInput" accept=".json,application/json" hidden />
       <button class="btn btn-primary" id="exportTop">Eksportuj Excel</button>
     </div>
   </header>
@@ -158,6 +161,6 @@ Jan Kowalski	2026-08-03 06:00:00	2026-08-03 14:15:00"></textarea>
     </section>
   </main>
 
-  <footer>AGRO Godziny 1.1 · dane przetwarzane lokalnie w przeglądarce</footer>
+  <footer>AGRO Godziny 1.2 · dane przetwarzane lokalnie w przeglądarce</footer>
 </body>
 </html>

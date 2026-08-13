@@ -1,4 +1,4 @@
-# AGRO Godziny 1.0 — wersja finalna
+# AGRO Godziny 1.2 — wersja finalna
 
 Statyczna aplikacja webowa do rozliczania czasu pracy na podstawie eksportu Prodio.
 Działa na GitHub Pages; dane i ręczne korekty są przechowywane lokalnie w przeglądarce użytkownika.
@@ -13,7 +13,6 @@ Aplikacja rozpoznaje lekki plik XLSX zawierający:
 
 - Prodio: najwcześniejszy Start + najpóźniejszy Stop pracownika danego dnia.
 - Standardowy czas Prodio jest zaokrąglany do 15 minut zgodnie z przyjętą logiką.
-- Wyjątki 30-minutowego zaokrąglania Start/Stop pozostają zgodne z konfiguracją pracowników.
 - Norma dzienna w normalnym dniu roboczym (pon.–pt.) = 8:00.
 - Powyżej 8:00: nadwyżka trafia do 50%.
 - Poniżej 8:00: powstaje niedogodzina.
@@ -30,6 +29,7 @@ Aplikacja rozpoznaje lekki plik XLSX zawierający:
 - aktywowanie/wyłączanie pracowników z raportów,
 - ręczne godziny dla MAGAZYNU/SERWISU,
 - ręczne korekty Start/Stop dla danych Prodio,
+- Start/Stop nie są automatycznie zaokrąglane – aplikacja zachowuje rzeczywisty pierwszy Start i ostatni Stop z Prodio,
 - szybkie korekty −15 / −10 / −5 / +5 / +10 / +15 minut,
 - przywrócenie wartości źródłowej Prodio,
 - kody nieobecności,
@@ -46,3 +46,13 @@ W repozytorium `agro-godziny` podmień cztery pliki z tej paczki:
 - `README.md`
 
 Wykonaj `Commit changes` i poczekaj na deployment GitHub Pages. Wersja 1.0 zawiera cache-busting (`?v=1.0.0`) dla plików JS/CSS, aby przeglądarka pobierała właściwą wersję aplikacji po publikacji.
+
+## Kopia bezpieczeństwa
+
+Wersja 1.2 ma dwa przyciski w górnym pasku:
+
+- **Zapisz kopię** – pobiera plik JSON zawierający bieżący stan aplikacji: ewidencję, nieobecności, ręczne korekty Start/Stop, ręczne godziny Magazynu/Serwisu, konfigurację pracowników oraz aktualnie wczytane rekordy Prodio.
+- **Wczytaj kopię** – przywraca wcześniej zapisany stan na tym samym lub innym komputerze. Wczytanie kopii zastępuje bieżący lokalny stan po potwierdzeniu.
+
+Kopię warto zapisywać regularnie, np. raz w tygodniu i przed większym importem danych Prodio. Plik kopii może zawierać dane pracownicze, dlatego należy przechowywać go jak dokument wewnętrzny firmy.
+

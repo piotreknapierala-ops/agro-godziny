@@ -4,6 +4,10 @@ const CATEGORIES = ["AGRO-PROJECTS PRODUKCJA","KOWSEN POL","ZLECENIE","MAGAZYN",
 const STORAGE_KEY = "agroGodzinyStateV1";
 const CONFIG_KEY = "agroGodzinyEmployeesV1";
 
+const BACKUP_APP_ID = "AGRO_GODZINY";
+const BACKUP_SCHEMA = 1;
+const APP_VERSION = "1.2";
+
 let employees = loadEmployees();
 let state = loadState();
 let rawCount = 0;
@@ -345,6 +349,65 @@ function processRecords(records,sourceName=""){
 }
 
 function setStatus(txt,type="ok"){ const b=$("#statusBox"); b.textContent=txt; b.className="status-box"+(type==="error"?" error":type==="warn"?" warn":""); }
+function backupFileName(){
+  const now=new Date();
+  const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
+  return `AGRO_GODZINY_KOPIA_${state.month}_${stamp}.json`;
+}
+function saveBackupFile(){
+  try{
+    const payload={
+      app:BACKUP_APP_ID,
+      schema:BACKUP_SCHEMA,
+      version:APP_VERSION,
+      savedAt:new Date().toISOString(),
+      state,
+      employees,
+      absenceCodes:ABSENCE_CODES,
+      rawCount,
+      currentRecords
+    };
+    const blob=new Blob([JSON.stringify(payload)],{type:"application/json;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=backupFileName();
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    setStatus(`Zapisano kopię bezpieczeństwa: ${a.download}.`,"ok");
+  }catch(e){
+    console.error(e); setStatus("Nie udało się zapisać kopii bezpieczeństwa.","error");
+  }
+}
+function validateBackup(x){
+  if(!x || x.app!==BACKUP_APP_ID || Number(x.schema)!==BACKUP_SCHEMA) throw new Error("To nie jest prawidłowa kopia AGRO Godziny.");
+  if(!x.state || !x.state.month || !Array.isArray(x.state.rows)) throw new Error("Kopia nie zawiera prawidłowej ewidencji.");
+  if(!Array.isArray(x.employees) || !x.employees.length) throw new Error("Kopia nie zawiera listy pracowników.");
+  return x;
+}
+async function loadBackupFile(file){
+  try{
+    const x=validateBackup(JSON.parse(await file.text()));
+    if(!confirm(`Wczytać kopię z ${x.savedAt ? new Date(x.savedAt).toLocaleString("pl-PL") : "nieznanej daty"}?\n\nBieżący lokalny stan aplikacji zostanie zastąpiony danymi z kopii.`)) return;
+    employees=x.employees;
+    ABSENCE_CODES=Array.isArray(x.absenceCodes)&&x.absenceCodes.length ? x.absenceCodes : ABSENCE_CODES;
+    state=x.state;
+    rawCount=Number(x.rawCount)||0;
+    currentRecords=Array.isArray(x.currentRecords)?x.currentRecords:[];
+    state.rows.forEach(recalcRow);
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    localStorage.setItem(CONFIG_KEY,JSON.stringify(employees));
+    $("#monthInput").value=state.month;
+    $("#sunday100").checked=!!state.sunday100;
+    $("#autoUnknown").checked=state.autoUnknown!==false;
+    $("#fileName").textContent=state.sourceName?`Stan z kopii · źródło: ${state.sourceName}`:"Stan wczytany z kopii";
+    renderAll();
+    setStatus(`Wczytano kopię bezpieczeństwa${x.savedAt?` z ${new Date(x.savedAt).toLocaleString("pl-PL")}`:""}. Wszystkie ręczne wpisy i nieobecności zostały przywrócone.`,"ok");
+  }catch(e){
+    console.error(e); setStatus(e.message||"Nie udało się wczytać kopii bezpieczeństwa.","error");
+  }finally{
+    $("#backupInput").value="";
+  }
+}
 function renderStats(){
   const used=state.rows.filter(r=>r.start!==null||r.stop!==null); const emps=new Set(used.map(r=>canonical(r.employee)));
   $("#statRecords").textContent=rawCount.toLocaleString("pl-PL"); $("#statEmployees").textContent=emps.size; $("#statDays").textContent=used.length; $("#statWarnings").textContent=state.rows.filter(r=>["warn","error"].includes(statusForRow(r).type)).length;
@@ -540,6 +603,9 @@ function bind(){
     if(e.target.closest(".restore-prodio")){restoreProdio(tr);return;}
   });
   $("#addManual").addEventListener("click",addManualRow);
+  $("#saveBackup").addEventListener("click",saveBackupFile);
+  $("#loadBackup").addEventListener("click",()=>$("#backupInput").click());
+  $("#backupInput").addEventListener("change",async e=>{const f=e.target.files[0];if(f)await loadBackupFile(f);});
   $("#exportTop").addEventListener("click",exportExcel); $("#exportSummary").addEventListener("click",exportExcel);
   $("#processPaste").addEventListener("click",()=>{try{processRecords(parseDelimited($("#pasteInput").value),"wklejone dane");}catch(e){setStatus(e.message,"error");}});
   $("#clearMonth").addEventListener("click",()=>{state.rows=makeBlankRows();rawCount=0;saveAll();renderAll();setStatus("Wyczyszczono ewidencję wybranego miesiąca.");});
