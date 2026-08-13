@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="AGRO Godziny – szybkie rozliczanie czasu pracy z eksportu Prodio" />
-  <title>AGRO Godziny 1.0</title>
-  <link rel="stylesheet" href="style.css?v=1.0.0" />
+  <title>AGRO Godziny 1.1</title>
+  <link rel="stylesheet" href="style.css?v=1.1.0" />
   <script defer src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-  <script defer src="app.js?v=1.0.0"></script>
+  <script defer src="app.js?v=1.1.0"></script>
 </head>
 <body>
   <header class="topbar">
@@ -142,7 +142,6 @@ Jan Kowalski	2026-08-03 06:00:00	2026-08-03 14:15:00"></textarea>
           <p><b>Prodio</b> – aplikacja bierze najwcześniejszy Start i najpóźniejszy Stop danego dnia.</p>
           <p><b>Ręcznie</b> – godziny wpisujesz sam, tak jak obecnie dla części Magazynu/Serwisu.</p>
           <p><b>Zaokr. czasu 15 min</b> – odpowiednik obecnego <code>ROUND(...*96)/96</code>.</p>
-          <p><b>Zaokr. Start/Stop 30 min</b> – wyjątek z obecnego pliku dla Denysa Sydorova i Mariusza Durzyńskiego.</p>
         </div>
       </div>
 
@@ -152,13 +151,13 @@ Jan Kowalski	2026-08-03 06:00:00	2026-08-03 14:15:00"></textarea>
           <button class="btn btn-secondary" id="resetEmployees">Przywróć konfigurację z pliku wzorcowego</button>
         </div>
         <table id="employeesTable">
-          <thead><tr><th>Aktywny</th><th>Pracownik</th><th>Spółka / dział</th><th>Źródło godzin</th><th>Zaokr. czasu</th><th>Zaokr. Start/Stop</th></tr></thead>
+          <thead><tr><th>Aktywny</th><th>Pracownik</th><th>Spółka / dział</th><th>Źródło godzin</th><th>Zaokr. czasu</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </section>
   </main>
 
-  <footer>AGRO Godziny 1.0 · dane przetwarzane lokalnie w przeglądarce</footer>
+  <footer>AGRO Godziny 1.1 · dane przetwarzane lokalnie w przeglądarce</footer>
 </body>
 </html>
