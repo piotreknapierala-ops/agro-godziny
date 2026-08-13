@@ -7,6 +7,7 @@ const CONFIG_KEY = "agroGodzinyEmployeesV1";
 let employees = loadEmployees();
 let state = loadState();
 let rawCount = 0;
+let currentRecords = [];
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => [...document.querySelectorAll(sel)];
@@ -14,7 +15,11 @@ function pad(n){ return String(n).padStart(2,"0"); }
 const normalizeName = s => String(s ?? "").replace(/\s+/g," ").trim();
 const canonical = s => normalizeName(s).toLocaleLowerCase("pl-PL");
 const minutesToText = m => m === null || m === undefined || Number.isNaN(m) ? "" : `${Math.floor(m/60)}:${pad(Math.round(m%60))}`;
-const timeToText = m => m === null || m === undefined || Number.isNaN(m) ? "" : `${pad(Math.floor(m/60)%24)}:${pad(Math.round(m%60))}`;
+const timeToText = m => {
+  if(m === null || m === undefined || Number.isNaN(m)) return "";
+  const total = ((Math.round(Number(m)) % 1440) + 1440) % 1440;
+  return `${pad(Math.floor(total/60))}:${pad(total%60)}`;
+};
 const textToMinutes = t => { if(!t) return null; const m=String(t).match(/^(\d{1,2}):(\d{2})$/); return m ? Number(m[1])*60+Number(m[2]) : null; };
 const dayNames = ["niedziela","poniedziałek","wtorek","środa","czwartek","piątek","sobota"];
 const polishMonth = ["styczeń","luty","marzec","kwiecień","maj","czerwiec","lipiec","sierpień","wrzesień","październik","listopad","grudzień"];
@@ -282,10 +287,11 @@ function addUnknownEmployee(name){
 function processRecords(records,sourceName=""){
   if(!records.length) throw new Error("Brak danych do przeliczenia.");
   rawCount=records.length;
+  currentRecords = records;
   const latest=latestMonth(records);
   const selected=$("#monthInput").value||state.month;
   const selectedHasData=records.some(r=>{const d=parseDateTime(r.start)||parseDateTime(r.stop);return d&&`${d.getFullYear()}-${pad(d.getMonth()+1)}`===selected;});
-  if(latest&&!selectedHasData){$("#monthInput").value=latest;state.month=latest;}
+  state.month=selected;
   records.forEach(r=>addUnknownEmployee(r.employee));
   const previous=new Map(state.rows.filter(r=>r.edited||r.absence||r.source==="manual").map(r=>[`${canonical(r.employee)}|${r.date}`,r]));
   state.rows=makeBlankRows(); const {y,m}=getMonthParts();
@@ -310,7 +316,11 @@ function processRecords(records,sourceName=""){
   for(const [key,old] of previous){ const r=byKey.get(key); if(!r) continue; if(old.edited||old.source==="manual"){r.start=old.start;r.stop=old.stop;r.edited=old.edited;r.source=old.source;} if(old.absence)r.absence=old.absence; recalcRow(r); }
   state.sourceName=sourceName; state.sunday100=$("#sunday100").checked; state.autoUnknown=$("#autoUnknown").checked; saveAll(); renderAll();
   const unknown=[...new Set(records.map(r=>normalizeName(r.employee)).filter(n=>n&&(!employeeByName(n)||employeeByName(n).category==="NIEPRZYPISANY")))];
-  setStatus(`Przeliczono ${records.length.toLocaleString("pl-PL")} rekordów · miesiąc ${state.month}${unknown.length?` · ${unknown.length} nazwisk spoza listy pracowników – sprawdź zakładkę 4`:""}.`,unknown.length?"warn":"ok");
+  if(!selectedHasData){
+    setStatus(`Brak danych Prodio za ${state.month}${latest?` · ostatni miesiąc z danymi: ${latest}`:""}.`,"warn");
+  } else {
+    setStatus(`Przeliczono ${records.length.toLocaleString("pl-PL")} rekordów · miesiąc ${state.month}${unknown.length?` · ${unknown.length} nazwisk spoza listy pracowników – sprawdź zakładkę 4`:""}.`,unknown.length?"warn":"ok");
+  }
 }
 
 function setStatus(txt,type="ok"){ const b=$("#statusBox"); b.textContent=txt; b.className="status-box"+(type==="error"?" error":type==="warn"?" warn":""); }
@@ -405,7 +415,11 @@ async function exportExcel(){
 function bind(){
   $$(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
   $("#monthInput").value=state.month; $("#sunday100").checked=!!state.sunday100; $("#autoUnknown").checked=state.autoUnknown!==false;
-  $("#monthInput").addEventListener("change",()=>{state.month=$("#monthInput").value; syncRowsWithEmployees();});
+  $("#monthInput").addEventListener("change",()=>{
+    state.month=$("#monthInput").value;
+    if(currentRecords.length) processRecords(currentRecords,state.sourceName||"wczytane dane");
+    else syncRowsWithEmployees();
+  });
   $("#sunday100").addEventListener("change",()=>{state.sunday100=$("#sunday100").checked;state.rows.forEach(recalcRow);saveAll();renderAll();});
   $("#autoUnknown").addEventListener("change",()=>{state.autoUnknown=$("#autoUnknown").checked;saveAll();});
   ["#filterCategory","#filterEmployee","#filterRows"].forEach(s=>$(s).addEventListener("change",renderRecords));
