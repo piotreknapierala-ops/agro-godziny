@@ -100,7 +100,7 @@ Jan Kowalski	2026-08-03 06:00:00	2026-08-03 14:15:00"></textarea>
           <thead>
             <tr>
               <th>Data</th><th>Dzień</th><th>Pracownik</th><th>Spółka / dział</th>
-              <th>Start</th><th>Stop</th><th>Przepracowano</th><th>50%</th><th>100%</th>
+              <th>Start</th><th>Stop</th><th>Przepracowano</th><th>50%</th><th>100%</th><th>Niedogodz.</th>
               <th>Nieobecność</th><th>Źródło</th><th>Status</th>
             </tr>
           </thead>
@@ -120,7 +120,7 @@ Jan Kowalski	2026-08-03 06:00:00	2026-08-03 14:15:00"></textarea>
       <div id="categoryCards" class="category-cards"></div>
       <div class="card table-wrap">
         <table id="summaryTable">
-          <thead><tr><th>Pracownik</th><th>Spółka / dział</th><th>Godziny</th><th>50%</th><th>100%</th><th>Nieobecności</th><th>Dni z pracą</th></tr></thead>
+          <thead><tr><th>Pracownik</th><th>Spółka / dział</th><th>Godziny po komp.</th><th>50% po komp.</th><th>100%</th><th>Niedogodz.</th><th>Z 50%</th><th>Z godzin</th><th>Nieobecności</th><th>Dni z pracą</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -132,6 +132,8 @@ Jan Kowalski	2026-08-03 06:00:00	2026-08-03 14:15:00"></textarea>
           <h2>Zasady liczenia</h2>
           <label class="checkline"><input type="checkbox" id="sunday100" /> Niedzielę licz jak sobotę (100% całego czasu)</label>
           <p class="hint">Domyślnie wyłączone, aby zachować standardową logikę obecnego pliku: tylko sobota wpada w 100%.</p>
+          <p class="hint"><b>Norma 8 h:</b> w pon.–pt. praca poniżej 8 h tworzy niedogodziny. Miesięcznie niedogodziny najpierw pomniejszają pulę 50%, a pozostała część pomniejsza ogólną liczbę godzin.</p>
+          <p class="hint"><b>Nieobecność + praca:</b> jeśli w dniu z dowolnym kodem nieobecności są godziny pracy, cały przepracowany czas trafia do 50% i nie tworzy niedogodzin.</p>
           <label class="checkline"><input type="checkbox" id="autoUnknown" checked /> Automatycznie dodawaj nowych pracowników znalezionych w Prodio</label>
           <p class="hint">Nowy pracownik trafia do „NIEPRZYPISANY” i jest oznaczony do sprawdzenia.</p>
         </div>

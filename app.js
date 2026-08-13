@@ -53,17 +53,38 @@ function statusForRow(r){
   const dur=durationMinutes(r.start,r.stop);
   if(dur===0) return {type:"error",text:"0 h"};
   if(dur>16*60) return {type:"warn",text:"> 16 h"};
+  if(r.absence && r.work>0) return {type:"ok",text:"wolne + praca → 50%"};
+  if((r.shortfall||0)>0) return {type:"ok",text:`niedogodz. ${minutesToText(r.shortfall)}`};
   return {type:"ok",text:"OK"};
 }
 function recalcRow(r){
   const e=employeeByName(r.employee) || {workRound:15};
   let dur=durationMinutes(r.start,r.stop);
+  r.shortfall=0;
   if(dur===null){ r.work=null; r.ot50=null; r.ot100=null; return; }
   r.work=roundNearest(dur,Number(e.workRound)||0);
   const dt=localDateFromKey(r.date), dow=dt.getDay();
+
+  // Zasada nadrzędna: jakakolwiek nieobecność + faktyczna praca = cały czas do 50%.
+  // Taki dzień nie tworzy niedogodzin i nie wpada do 100%, nawet jeśli przypada w weekend.
+  if(r.absence && r.work>0){
+    r.ot50=r.work;
+    r.ot100=null;
+    return;
+  }
+
   const weekend100 = dow===6 || (state.sunday100 && dow===0);
-  r.ot100=weekend100 ? r.work : null;
-  r.ot50=weekend100 ? null : Math.max(0,r.work-480);
+  if(weekend100){
+    r.ot100=r.work;
+    r.ot50=null;
+    return;
+  }
+
+  r.ot100=null;
+  r.ot50=Math.max(0,r.work-480);
+  // Niedogodziny powstają wyłącznie w normalnym dniu roboczym (pon.–pt.),
+  // gdy pracownik rzeczywiście pracował, ale krócej niż 8 godzin i nie ma nieobecności.
+  if(dow>=1 && dow<=5 && r.work>0 && r.work<480) r.shortfall=480-r.work;
 }
 function makeBlankRows(){
   const {y,m,days}=getMonthParts(); const rows=[];
@@ -370,21 +391,45 @@ function renderRecords(){
       <td>${r.date}</td><td>${dayNames[dt.getDay()]}</td><td><b>${escapeHtml(r.employee)}</b></td><td>${escapeHtml(r.category)}</td>
       <td><div class="time-edit"><input class="time-input start-input" type="time" step="60" value="${timeToText(r.start)}">${nudgeButtons('start',r.start)}</div></td>
       <td><div class="time-edit"><input class="time-input stop-input" type="time" step="60" value="${timeToText(r.stop)}">${nudgeButtons('stop',r.stop)}</div></td>
-      <td><b>${minutesToText(r.work)}</b></td><td>${minutesToText(r.ot50)}</td><td>${minutesToText(r.ot100)}</td>
+      <td><b>${minutesToText(r.work)}</b></td><td>${minutesToText(r.ot50)}</td><td>${minutesToText(r.ot100)}</td><td>${minutesToText(r.shortfall)}</td>
       <td><select class="absence-select">${absenceOptions(r.absence)}</select></td>
       <td><span class="badge badge-${src}">${srcLabel}</span>${r.rawHits?` <small>${r.rawHits} wpis.</small>`:""}${restore}</td>
       <td><span class="badge badge-${st.type}">${st.text}</span></td></tr>`;
-  }).join("") || `<tr><td colspan="12" class="empty">Brak wpisów dla wybranego filtra.</td></tr>`;
+  }).join("") || `<tr><td colspan="13" class="empty">Brak wpisów dla wybranego filtra.</td></tr>`;
 }
 function totals(){
-  const map=new Map(); for(const e of employees.filter(x=>x.active)) map.set(canonical(e.name),{employee:e.name,category:e.category,work:0,ot50:0,ot100:0,abs:new Map(),days:0});
-  for(const r of state.rows){ const t=map.get(canonical(r.employee)); if(!t)continue; if(r.work!==null){t.work+=r.work;t.days++;} if(r.ot50)t.ot50+=r.ot50; if(r.ot100)t.ot100+=r.ot100; if(r.absence)t.abs.set(r.absence,(t.abs.get(r.absence)||0)+1); }
+  const map=new Map();
+  for(const e of employees.filter(x=>x.active)){
+    map.set(canonical(e.name),{employee:e.name,category:e.category,rawWork:0,rawOt50:0,ot100:0,shortfall:0,work:0,ot50:0,deductFrom50:0,deductFromWork:0,uncoveredShortfall:0,abs:new Map(),days:0});
+  }
+  for(const r of state.rows){
+    const t=map.get(canonical(r.employee)); if(!t)continue;
+    if(r.work!==null){t.rawWork+=r.work;t.days++;}
+    if(r.ot50)t.rawOt50+=r.ot50;
+    if(r.ot100)t.ot100+=r.ot100;
+    if(r.shortfall)t.shortfall+=r.shortfall;
+    if(r.absence)t.abs.set(r.absence,(t.abs.get(r.absence)||0)+1);
+  }
+  for(const t of map.values()){
+    // Miesięczna kompensata: niedogodziny najpierw kasują pulę 50%,
+    // a dopiero pozostała część pomniejsza ogólną liczbę godzin.
+    t.deductFrom50=Math.min(t.rawOt50,t.shortfall);
+    t.ot50=Math.max(0,t.rawOt50-t.deductFrom50);
+    const remaining=Math.max(0,t.shortfall-t.deductFrom50);
+    t.deductFromWork=Math.min(t.rawWork,remaining);
+    t.work=Math.max(0,t.rawWork-t.deductFromWork);
+    t.uncoveredShortfall=Math.max(0,remaining-t.rawWork);
+  }
   return [...map.values()];
 }
 function renderSummary(){
   const ts=totals().sort((a,b)=>a.category.localeCompare(b.category,"pl")||a.employee.localeCompare(b.employee,"pl")); const {y,m}=getMonthParts(); $("#summaryMonthLabel").textContent=`${polishMonth[m-1]} ${y}`;
-  $("#summaryTable tbody").innerHTML=ts.map(t=>`<tr><td><b>${escapeHtml(t.employee)}</b></td><td>${escapeHtml(t.category)}</td><td><b>${minutesToText(t.work)}</b></td><td>${minutesToText(t.ot50)}</td><td>${minutesToText(t.ot100)}</td><td>${[...t.abs.entries()].map(([k,v])=>`${k} × ${v}`).join(", ")||"—"}</td><td>${t.days}</td></tr>`).join("");
-  const cats=CATEGORIES.filter(c=>c!=="NIEPRZYPISANY"||ts.some(t=>t.category===c)); $("#categoryCards").innerHTML=cats.map(c=>{ const arr=ts.filter(t=>t.category===c); const w=arr.reduce((s,x)=>s+x.work,0), f=arr.reduce((s,x)=>s+x.ot50,0), h=arr.reduce((s,x)=>s+x.ot100,0); return `<div class="cat-card"><div class="name">${escapeHtml(c)}</div><div class="hours">${minutesToText(w)}</div><div class="sub">50%: ${minutesToText(f)||"0:00"} · 100%: ${minutesToText(h)||"0:00"}</div></div>`; }).join("");
+  $("#summaryTable tbody").innerHTML=ts.map(t=>`<tr><td><b>${escapeHtml(t.employee)}</b></td><td>${escapeHtml(t.category)}</td><td><b>${minutesToText(t.work)}</b></td><td>${minutesToText(t.ot50)}</td><td>${minutesToText(t.ot100)}</td><td>${minutesToText(t.shortfall)}</td><td>${minutesToText(t.deductFrom50)}</td><td>${minutesToText(t.deductFromWork)}</td><td>${[...t.abs.entries()].map(([k,v])=>`${k} × ${v}`).join(", ")||"—"}</td><td>${t.days}</td></tr>`).join("");
+  const cats=CATEGORIES.filter(c=>c!=="NIEPRZYPISANY"||ts.some(t=>t.category===c)); $("#categoryCards").innerHTML=cats.map(c=>{
+    const arr=ts.filter(t=>t.category===c);
+    const w=arr.reduce((s,x)=>s+x.work,0), f=arr.reduce((s,x)=>s+x.ot50,0), h=arr.reduce((s,x)=>s+x.ot100,0), sh=arr.reduce((s,x)=>s+x.shortfall,0), d50=arr.reduce((s,x)=>s+x.deductFrom50,0), dw=arr.reduce((s,x)=>s+x.deductFromWork,0);
+    return `<div class="cat-card"><div class="name">${escapeHtml(c)}</div><div class="hours">${minutesToText(w)}</div><div class="sub">50%: ${minutesToText(f)||"0:00"} · 100%: ${minutesToText(h)||"0:00"}<br>Niedogodz.: ${minutesToText(sh)||"0:00"} · z 50%: ${minutesToText(d50)||"0:00"} · z godzin: ${minutesToText(dw)||"0:00"}</div></div>`;
+  }).join("");
 }
 function renderEmployees(){
   $("#employeesTable tbody").innerHTML=employees.map((e,i)=>`<tr data-i="${i}"><td><input class="emp-active" type="checkbox" ${e.active?"checked":""}></td><td class="emp-name">${escapeHtml(e.name)}</td><td><select class="cat-select">${CATEGORIES.map(c=>`<option ${c===e.category?"selected":""}>${escapeHtml(c)}</option>`).join("")}</select></td><td><select class="mode-select"><option value="prodio" ${e.mode==="prodio"?"selected":""}>Prodio</option><option value="manual" ${e.mode==="manual"?"selected":""}>Ręcznie</option></select></td><td><select class="work-round"><option value="15" ${Number(e.workRound)===15?"selected":""}>15 min</option><option value="0" ${!Number(e.workRound)?"selected":""}>bez zaokr.</option></select></td><td><select class="edge-round"><option value="0" ${!Number(e.edgeRound)?"selected":""}>bez zaokr.</option><option value="30" ${Number(e.edgeRound)===30?"selected":""}>w górę do 30 min</option></select></td></tr>`).join("");
@@ -443,24 +488,27 @@ async function exportExcel(){
   const ts=totals();
 
   let ws=wb.addWorksheet("PODSUMOWANIE GODZIN",{views:[{state:"frozen",ySplit:4}]});
-  ws.mergeCells("A1:G1"); ws.getCell("A1").value=`AGRO – PODSUMOWANIE GODZIN · ${monthLabel.toUpperCase()}`; ws.getCell("A1").font={bold:true,size:16,color:{argb:white}}; ws.getCell("A1").fill={type:"pattern",pattern:"solid",fgColor:{argb:green}}; ws.getCell("A1").alignment={vertical:"middle"}; ws.getRow(1).height=32;
-  ws.addRow([]); ws.addRow(["Spółka / dział","Godziny","50%","100%","Pracownicy z pracą"]); styleHeader(ws.getRow(3));
-  for(const c of CATEGORIES){ const arr=ts.filter(t=>t.category===c); if(!arr.length)continue; ws.addRow([c,arr.reduce((s,x)=>s+x.work,0)/1440,arr.reduce((s,x)=>s+x.ot50,0)/1440,arr.reduce((s,x)=>s+x.ot100,0)/1440,arr.filter(x=>x.days).length]); }
-  ws.addRow([]); ws.addRow(["Pracownik","Spółka / dział","Godziny","50%","100%","Nieobecności","Dni z pracą"]); styleHeader(ws.lastRow);
-  for(const t of ts) ws.addRow([t.employee,t.category,t.work/1440,t.ot50/1440,t.ot100/1440,[...t.abs.entries()].map(([k,v])=>`${k} × ${v}`).join(", "),t.days]);
-  [29,29,13,13,13,26,14].forEach((w,i)=>ws.getColumn(i+1).width=w); [2,3,4].forEach(c=>ws.getColumn(c).numFmt="[h]:mm"); setBorders(ws);
+  ws.mergeCells("A1:J1"); ws.getCell("A1").value=`AGRO – PODSUMOWANIE GODZIN · ${monthLabel.toUpperCase()}`; ws.getCell("A1").font={bold:true,size:16,color:{argb:white}}; ws.getCell("A1").fill={type:"pattern",pattern:"solid",fgColor:{argb:green}}; ws.getCell("A1").alignment={vertical:"middle"}; ws.getRow(1).height=32;
+  ws.addRow([]); ws.addRow(["Spółka / dział","Godziny po kompensacie","50% po kompensacie","100%","Niedogodziny","Potrącono z 50%","Potrącono z godzin","Pracownicy z pracą"]); styleHeader(ws.getRow(3));
+  for(const c of CATEGORIES){
+    const arr=ts.filter(t=>t.category===c); if(!arr.length)continue;
+    ws.addRow([c,arr.reduce((s,x)=>s+x.work,0)/1440,arr.reduce((s,x)=>s+x.ot50,0)/1440,arr.reduce((s,x)=>s+x.ot100,0)/1440,arr.reduce((s,x)=>s+x.shortfall,0)/1440,arr.reduce((s,x)=>s+x.deductFrom50,0)/1440,arr.reduce((s,x)=>s+x.deductFromWork,0)/1440,arr.filter(x=>x.days).length]);
+  }
+  ws.addRow([]); ws.addRow(["Pracownik","Spółka / dział","Godziny po kompensacie","50% po kompensacie","100%","Niedogodziny","Potrącono z 50%","Potrącono z godzin","Nieobecności","Dni z pracą"]); styleHeader(ws.lastRow);
+  for(const t of ts) ws.addRow([t.employee,t.category,t.work/1440,t.ot50/1440,t.ot100/1440,t.shortfall/1440,t.deductFrom50/1440,t.deductFromWork/1440,[...t.abs.entries()].map(([k,v])=>`${k} × ${v}`).join(", "),t.days]);
+  [29,29,20,20,13,16,18,18,26,14].forEach((w,i)=>ws.getColumn(i+1).width=w); [3,4,5,6,7,8].forEach(c=>ws.getColumn(c).numFmt="[h]:mm"); setBorders(ws);
 
   ws=wb.addWorksheet("EWIDENCJA MIESIĄCA",{views:[{state:"frozen",ySplit:1}]});
-  ws.addRow(["Data","Dzień","Pracownik","Spółka / dział","Start","Stop","Przepracowano","50%","100%","Nieobecność","Źródło","Status"]); styleHeader(ws.getRow(1));
+  ws.addRow(["Data","Dzień","Pracownik","Spółka / dział","Start","Stop","Przepracowano","50%","100%","Niedogodziny","Nieobecność","Źródło","Status"]); styleHeader(ws.getRow(1));
   const used=state.rows.filter(r=>r.start!==null||r.stop!==null||r.absence).sort((a,b)=>a.date.localeCompare(b.date)||a.employee.localeCompare(b.employee,"pl"));
-  for(const r of used){ const st=statusForRow(r), src=r.source==="edit"?"Korekta":r.source==="prodio"?"Prodio":"Ręcznie"; const d=localDateFromKey(r.date); ws.addRow([d,dayNames[d.getDay()],r.employee,r.category,r.start===null?null:r.start/1440,r.stop===null?null:r.stop/1440,r.work===null?null:r.work/1440,r.ot50===null?null:r.ot50/1440,r.ot100===null?null:r.ot100/1440,r.absence,src,st.text]); }
-  ws.getColumn(1).numFmt="dd.mm.yyyy"; [5,6].forEach(c=>ws.getColumn(c).numFmt="hh:mm"); [7,8,9].forEach(c=>ws.getColumn(c).numFmt="[h]:mm"); ws.columns.forEach((c,i)=>c.width=[13,14,28,28,10,10,14,11,11,15,12,18][i]); ws.autoFilter={from:"A1",to:"L1"}; setBorders(ws);
+  for(const r of used){ const st=statusForRow(r), src=r.source==="edit"?"Korekta":r.source==="prodio"?"Prodio":"Ręcznie"; const d=localDateFromKey(r.date); ws.addRow([d,dayNames[d.getDay()],r.employee,r.category,r.start===null?null:r.start/1440,r.stop===null?null:r.stop/1440,r.work===null?null:r.work/1440,r.ot50===null?null:r.ot50/1440,r.ot100===null?null:r.ot100/1440,(r.shortfall||0)/1440,r.absence,src,st.text]); }
+  ws.getColumn(1).numFmt="dd.mm.yyyy"; [5,6].forEach(c=>ws.getColumn(c).numFmt="hh:mm"); [7,8,9,10].forEach(c=>ws.getColumn(c).numFmt="[h]:mm"); ws.columns.forEach((c,i)=>c.width=[13,14,28,28,10,10,14,11,11,15,15,12,24][i]); ws.autoFilter={from:"A1",to:"M1"}; setBorders(ws);
 
   ws=wb.addWorksheet("NIEOBECNOŚCI"); ws.addRow(["Data","Pracownik","Spółka / dział","Kod","Opis"]); styleHeader(ws.getRow(1));
   for(const r of state.rows.filter(x=>x.absence)){ const code=ABSENCE_CODES.find(x=>x.code===r.absence); ws.addRow([localDateFromKey(r.date),r.employee,r.category,r.absence,code?.label||""]); }
   ws.getColumn(1).numFmt="dd.mm.yyyy"; ws.columns.forEach((c,i)=>c.width=[13,28,28,12,44][i]); setBorders(ws);
 
-  ws=wb.addWorksheet("INFO"); ws.addRows([["AGRO Godziny"],["Miesiąc",monthLabel],["Źródło",state.sourceName||"wklejone dane"],["Rekordy wejściowe",rawCount],["Wygenerowano",new Date()],["Zasada Prodio","najwcześniejszy Start + najpóźniejszy Stop pracownika w dniu"],["Nadgodziny 50%","dni inne niż sobota; nadwyżka ponad 8 h"],["Nadgodziny 100%",state.sunday100?"sobota i niedziela – cały czas":"sobota – cały czas"]]); ws.getColumn(1).width=24;ws.getColumn(2).width=65;
+  ws=wb.addWorksheet("INFO"); ws.addRows([["AGRO Godziny"],["Miesiąc",monthLabel],["Źródło",state.sourceName||"wklejone dane"],["Rekordy wejściowe",rawCount],["Wygenerowano",new Date()],["Zasada Prodio","najwcześniejszy Start + najpóźniejszy Stop pracownika w dniu"],["Norma dzienna","8:00 w normalnym dniu roboczym (pon.–pt.)"],["Nadgodziny 50%","bez nieobecności: nadwyżka ponad 8 h; nieobecność + praca: cały przepracowany czas"],["Niedogodziny","praca poniżej 8 h w pon.–pt. bez nieobecności; miesięcznie najpierw pomniejszają 50%, potem ogólne godziny"],["Nadgodziny 100%",state.sunday100?"sobota i niedziela – cały czas, o ile dzień nie ma nieobecności":"sobota – cały czas, o ile dzień nie ma nieobecności"]]); ws.getColumn(1).width=26;ws.getColumn(2).width=90;
 
   const buf=await wb.xlsx.writeBuffer(); const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`AGRO_GODZINY_${state.month}.xlsx`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
@@ -513,4 +561,4 @@ async function handleFile(f){
   }catch(e){console.error(e);setStatus(e.message||"Nie udało się wczytać pliku.","error");}
 }
 
-document.addEventListener("DOMContentLoaded",()=>{bind();ensureRows();renderAll();});
+document.addEventListener("DOMContentLoaded",()=>{bind();ensureRows();state.rows.forEach(recalcRow);saveAll();renderAll();});
