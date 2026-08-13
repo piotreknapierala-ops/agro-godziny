@@ -1,5 +1,5 @@
 const DEFAULT_EMPLOYEES = [{"name": "Michał Formela", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Michał Grajewski", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Oleksandr Khodorovskyi", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Dmytro Tiahnybida", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Serhii  Perevyshnko", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Mirosław Kaczmarek", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Oleksandr Samoilewko", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Dmitry Zhuleha", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Denis Martynov", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Valerii Filonenko", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Ryszard Wojciechowski", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Oleksander Zakharchenko", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Dariusz  Kucharzewski", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Artak Baiazelian", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Michał Pogorzelski", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Denis Semchyshyn", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Paweł Derda", "category": "ZLECENIE", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Andrii Isaiev", "category": "AGRO-PROJECTS PRODUKCJA", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Oleksandr Shestak", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Łukasz Żak", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Patryk Ratajczak", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Łukasz Kmiecik", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Patryk Szymański", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Roman Viashehenko", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Kacper Pietrasz", "category": "AGRO-PROJECTS PRODUKCJA", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Wojtek Rawecki", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Tomasz Sobik", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Bartosz Antkowiak", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Mateusz Gronostaj", "category": "AGRO-PROJECTS PRODUKCJA", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Artur Piasecki", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Oleksander Rzuh", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Marcin Walicht", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Wojciech Nowak", "category": "MAGAZYN", "active": true, "mode": "manual", "edgeRound": 0, "workRound": 0}, {"name": "Paweł Kruszona", "category": "MAGAZYN", "active": true, "mode": "manual", "edgeRound": 0, "workRound": 0}, {"name": "Łukasz Grygier", "category": "MAGAZYN", "active": true, "mode": "manual", "edgeRound": 0, "workRound": 0}, {"name": "Michał Nowak", "category": "MAGAZYN", "active": true, "mode": "manual", "edgeRound": 0, "workRound": 0}, {"name": "Mateusz Dudzmal", "category": "SERWIS", "active": true, "mode": "manual", "edgeRound": 0, "workRound": 0}, {"name": "Marek Paszkiewicz", "category": "SERWIS", "active": true, "mode": "manual", "edgeRound": 0, "workRound": 0}, {"name": "Filip Zajc", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Ihor Shkrybliak", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Vasyl Tkachenko", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Yevhenii Rylin", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Volodymyr Myhal", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Anatolii Proskurnia", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Oleksandr Litvinov", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Denys Sydorov", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 30, "workRound": 15}, {"name": "Yevhen Rydun", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Illia Stacodub", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Jarosław Gintrowski", "category": "MAGAZYN", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Kostiantyn Audshkin", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Jonasz Drews", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Kushłym Maksym", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Yevhen Tyshchenko", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Dmitry Shpak", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Mykola Mumeniuk", "category": "KOWSEN POL", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Mariusz Durzyński", "category": "MAGAZYN", "active": true, "mode": "prodio", "edgeRound": 30, "workRound": 0}, {"name": "Bartosz Grajewski", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Edgar Losan", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Marek Marciniak", "category": "MAGAZYN", "active": true, "mode": "manual", "edgeRound": 0, "workRound": 0}, {"name": "Bogdan Vereshchak", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Mateusz Brudło", "category": "AGRO-PROJECTS PRODUKCJA", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Artem Welemety", "category": "AGRO-PROJECTS PRODUKCJA", "active": false, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Serhij Nerukh", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Ivan Vozobel", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Filip Sobik", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Maciej Dziedzic", "category": "AGRO-PROJECTS PRODUKCJA", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}, {"name": "Dmitri Titarenko", "category": "KOWSEN POL", "active": true, "mode": "prodio", "edgeRound": 0, "workRound": 15}];
-const ABSENCE_CODES = [{"code": "UW", "label": "Urlop wypoczynkowy"}, {"code": "Ch", "label": "Zwolnienie lekarskie"}, {"code": "Op", "label": "Zwolnienie lekarskie - opieka"}, {"code": "Um", "label": "Urlop macierzyński"}, {"code": "Uwych", "label": "Urlop wychowawczy"}, {"code": "Uok", "label": "Urlop okolicznościowy"}, {"code": "NpK", "label": "Oddanie krwi"}, {"code": "Uwż", "label": "Urlop na żądanie"}, {"code": "Del", "label": "Delegacja"}, {"code": "Dw", "label": "Dzień wolny za przepracowaną sobotę"}, {"code": "NpL", "label": "Dzień wolny orzeczenie lekarskie"}, {"code": "NpS", "label": "Świadek  w sądzie"}, {"code": "UWop", "label": "Urlop opieka (te dwa dni na dziecko)"}];
+let ABSENCE_CODES = [{"code": "UW", "label": "Urlop wypoczynkowy"}, {"code": "Ch", "label": "Zwolnienie lekarskie"}, {"code": "Op", "label": "Zwolnienie lekarskie - opieka"}, {"code": "Um", "label": "Urlop macierzyński"}, {"code": "Uwych", "label": "Urlop wychowawczy"}, {"code": "Uok", "label": "Urlop okolicznościowy"}, {"code": "NpK", "label": "Oddanie krwi"}, {"code": "Uwż", "label": "Urlop na żądanie"}, {"code": "Del", "label": "Delegacja"}, {"code": "Dw", "label": "Dzień wolny za przepracowaną sobotę"}, {"code": "NpL", "label": "Dzień wolny orzeczenie lekarskie"}, {"code": "NpS", "label": "Świadek  w sądzie"}, {"code": "UWop", "label": "Urlop opieka (te dwa dni na dziecko)"}];
 const CATEGORIES = ["AGRO-PROJECTS PRODUKCJA","KOWSEN POL","ZLECENIE","MAGAZYN","SERWIS","NIEPRZYPISANY"];
 const STORAGE_KEY = "agroGodzinyStateV1";
 const CONFIG_KEY = "agroGodzinyEmployeesV1";
@@ -10,7 +10,7 @@ let rawCount = 0;
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => [...document.querySelectorAll(sel)];
-const pad = n => String(n).padStart(2,"0");
+function pad(n){ return String(n).padStart(2,"0"); }
 const normalizeName = s => String(s ?? "").replace(/\s+/g," ").trim();
 const canonical = s => normalizeName(s).toLocaleLowerCase("pl-PL");
 const minutesToText = m => m === null || m === undefined || Number.isNaN(m) ? "" : `${Math.floor(m/60)}:${pad(Math.round(m%60))}`;
@@ -107,18 +107,150 @@ function unwrap(v){ if(v&&typeof v==="object" && !(v instanceof Date)){ if(v.res
 function normHeader(s){ return normalizeName(unwrap(s)).toLocaleLowerCase("pl-PL").replace(/[._-]/g," "); }
 function findHeaderIndex(headers, wanted){ const w=normHeader(wanted); return headers.findIndex(h=>normHeader(h)===w); }
 
-async function rowsFromExcel(file){
-  if(typeof ExcelJS==="undefined") throw new Error("Biblioteka ExcelJS nie została załadowana. Sprawdź dostęp do internetu/CDN.");
-  const buf=await file.arrayBuffer(); const wb=new ExcelJS.Workbook(); await wb.xlsx.load(buf);
-  let ws=wb.getWorksheet("Historia pracy") || wb.worksheets.find(x=>normalizeName(x.name).toLowerCase()==="historia pracy") || wb.worksheets[0];
-  if(!ws) throw new Error("Brak arkusza do odczytu.");
-  const headers=[]; ws.getRow(1).eachCell({includeEmpty:true},(cell,col)=>headers[col-1]=unwrap(cell.value));
-  const iEmp=findHeaderIndex(headers,"Pracownik"), iStart=findHeaderIndex(headers,"Start"), iStop=findHeaderIndex(headers,"Stop");
-  if(iEmp<0||iStart<0||iStop<0) throw new Error(`Nie znaleziono kolumn Pracownik / Start / Stop w arkuszu „${ws.name}”.`);
-  const arr=[];
-  ws.eachRow((row,n)=>{ if(n===1)return; const emp=unwrap(row.getCell(iEmp+1).value); const st=unwrap(row.getCell(iStart+1).value); const sp=unwrap(row.getCell(iStop+1).value); if(emp||st||sp) arr.push({employee:emp,start:st,stop:sp}); });
-  return arr;
+// --- Fast XLSX reader -------------------------------------------------------
+// Reads only the worksheet XML that we need. It does not load styles, formulas,
+// drawings or the remaining Prodio columns into a workbook object model.
+function xmlDecode(s){
+  return String(s??"")
+    .replace(/&#x([0-9a-f]+);/gi,(_,h)=>String.fromCodePoint(parseInt(h,16)))
+    .replace(/&#(\d+);/g,(_,d)=>String.fromCodePoint(parseInt(d,10)))
+    .replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"')
+    .replace(/&apos;/g,"'").replace(/&amp;/g,"&");
 }
+function u16(dv,o){return dv.getUint16(o,true)}
+function u32(dv,o){return dv.getUint32(o,true)}
+function parseZipDirectory(buffer){
+  const dv=new DataView(buffer); let eocd=-1;
+  const min=Math.max(0,dv.byteLength-65557);
+  for(let i=dv.byteLength-22;i>=min;i--){if(u32(dv,i)===0x06054b50){eocd=i;break;}}
+  if(eocd<0) throw new Error("To nie wygląda na prawidłowy plik XLSX.");
+  const total=u16(dv,eocd+10), cdOffset=u32(dv,eocd+16), entries=new Map();
+  let p=cdOffset; const dec=new TextDecoder("utf-8");
+  for(let i=0;i<total;i++){
+    if(u32(dv,p)!==0x02014b50) throw new Error("Nie udało się odczytać struktury XLSX.");
+    const method=u16(dv,p+10), compSize=u32(dv,p+20), uncompSize=u32(dv,p+24);
+    const nameLen=u16(dv,p+28), extraLen=u16(dv,p+30), commentLen=u16(dv,p+32), localOffset=u32(dv,p+42);
+    const name=dec.decode(new Uint8Array(buffer,p+46,nameLen));
+    entries.set(name,{method,compSize,uncompSize,localOffset});
+    p+=46+nameLen+extraLen+commentLen;
+  }
+  return {buffer,entries};
+}
+async function zipEntryBytes(zip,name){
+  const e=zip.entries.get(name); if(!e) return null;
+  const dv=new DataView(zip.buffer), p=e.localOffset;
+  if(u32(dv,p)!==0x04034b50) throw new Error("Uszkodzony wpis w pliku XLSX.");
+  const nameLen=u16(dv,p+26), extraLen=u16(dv,p+28), start=p+30+nameLen+extraLen;
+  const src=new Uint8Array(zip.buffer,start,e.compSize);
+  if(e.method===0) return new Uint8Array(src);
+  if(e.method!==8) throw new Error(`Nieobsługiwana metoda kompresji XLSX (${e.method}).`);
+  if(typeof DecompressionStream==="undefined") throw new Error("Ta przeglądarka nie obsługuje szybkiego odczytu XLSX. Użyj aktualnego Chrome/Edge.");
+  const stream=new Blob([src]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function zipEntryText(zip,name){const b=await zipEntryBytes(zip,name); return b?new TextDecoder("utf-8").decode(b):null;}
+function normalizeZipPath(target){
+  target=xmlDecode(target).replace(/\\/g,"/");
+  if(target.startsWith("/")) return target.slice(1);
+  target=target.replace(/^\.\//,"");
+  return target.startsWith("xl/")?target:`xl/${target}`;
+}
+function parseSharedStrings(xml){
+  if(!xml) return [];
+  const out=[]; const si=/<si\b[^>]*>([\s\S]*?)<\/si>/g; let m;
+  while((m=si.exec(xml))){let txt="",tm; const tr=/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g; while((tm=tr.exec(m[1])))txt+=xmlDecode(tm[1]); out.push(txt);}
+  return out;
+}
+function decodeCell(attrs,inner,shared){
+  const tm=attrs.match(/\bt="([^"]+)"/), type=tm?tm[1]:"";
+  if(type==="inlineStr"){let txt="",x;const r=/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g;while((x=r.exec(inner)))txt+=xmlDecode(x[1]);return txt;}
+  const vm=inner.match(/<v>([\s\S]*?)<\/v>/); if(!vm)return ""; const raw=xmlDecode(vm[1]);
+  if(type==="s") return shared[Number(raw)]??"";
+  if(type==="str"||type==="d") return raw;
+  if(type==="b") return raw==="1";
+  const n=Number(raw); return Number.isFinite(n)?n:raw;
+}
+function parseRowValues(rowXml,rowNum,shared){
+  const out={}; const re=/<c\b([^>]*)\br="([A-Z]+)(\d+)"([^>]*)>([\s\S]*?)<\/c>/g; let m;
+  while((m=re.exec(rowXml))){out[m[2]]=decodeCell((m[1]||"")+(m[4]||""),m[5],shared);}
+  return out;
+}
+function firstRowValues(sheetXml,shared){
+  const m=sheetXml.match(/<row\b[^>]*\br="1"[^>]*>([\s\S]*?)<\/row>/); return m?parseRowValues(m[1],1,shared):{};
+}
+function findProdioColumns(sheetXml,shared){
+  const vals=firstRowValues(sheetXml,shared), result={};
+  for(const [col,val] of Object.entries(vals)){
+    const h=normHeader(val); if(h==="pracownik")result.employee=col; if(h==="start")result.start=col; if(h==="stop")result.stop=col;
+  }
+  return result.employee&&result.start&&result.stop?result:null;
+}
+function parseProdioSheet(sheetXml,shared,cols){
+  const wanted=[cols.employee,cols.start,cols.stop];
+  const alt=wanted.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|");
+  const re=new RegExp(`<c\\b([^>]*)\\br="(${alt})(\\d+)"([^>]*)>([\\s\\S]*?)<\\/c>`,"g");
+  const rows=[]; let current=0, rec=null, m;
+  const push=()=>{if(rec&&(rec.employee||rec.start||rec.stop))rows.push(rec);};
+  while((m=re.exec(sheetXml))){
+    const rn=Number(m[3]); if(rn===1)continue;
+    if(rn!==current){push();current=rn;rec={employee:"",start:"",stop:""};}
+    const val=decodeCell((m[1]||"")+(m[4]||""),m[5],shared);
+    if(m[2]===cols.employee)rec.employee=val; else if(m[2]===cols.start)rec.start=val; else if(m[2]===cols.stop)rec.stop=val;
+  }
+  push(); return rows;
+}
+function parseReferenceSheet(sheetXml,shared){
+  const employeesOut=[], absenceRaw=[]; const rr=/<row\b[^>]*\br="(\d+)"[^>]*>([\s\S]*?)<\/row>/g; let m;
+  while((m=rr.exec(sheetXml))){
+    const v=parseRowValues(m[2],Number(m[1]),shared); const name=normalizeName(v.B), cat=normalizeName(v.C), a=normalizeName(v.A);
+    if(name&&CATEGORIES.includes(cat)&&cat!=="NIEPRZYPISANY")employeesOut.push({name,category:cat});
+    if(a)absenceRaw.push(a);
+  }
+  const byCode=new Map();
+  for(const x of absenceRaw){const mt=x.match(/^(\S+)\s*(.*)$/);if(!mt)continue;const code=mt[1],label=mt[2].trim();if(!byCode.has(code))byCode.set(code,[]);if(label&&!byCode.get(code).includes(label))byCode.get(code).push(label);}
+  const abs=[...byCode.entries()].map(([code,labels])=>({code,label:labels.join(" / ")}));
+  return {employees:employeesOut,absences:abs};
+}
+function mergeImportedConfiguration(imported,absences){
+  if(imported?.length){
+    const old=new Map(employees.map(e=>[canonical(e.name),e])); const next=[];
+    for(const x of imported){
+      const prev=old.get(canonical(x.name));
+      if(prev) next.push({...prev,name:x.name,category:x.category});
+      else {
+        let mode=(x.category==="MAGAZYN"||x.category==="SERWIS")?"manual":"prodio", edgeRound=0, workRound=mode==="prodio"?15:0;
+        if(canonical(x.name)===canonical("Denys Sydorov")){mode="prodio";edgeRound=30;workRound=15;}
+        if(canonical(x.name)===canonical("Mariusz Durzyński")){mode="prodio";edgeRound=30;workRound=0;}
+        next.push({name:x.name,category:x.category,active:true,mode,edgeRound,workRound});
+      }
+    }
+    employees=next;
+  }
+  if(absences?.length) ABSENCE_CODES=absences;
+  localStorage.setItem(CONFIG_KEY,JSON.stringify(employees));
+}
+async function rowsFromExcel(file){
+  const buffer=await file.arrayBuffer(); const zip=parseZipDirectory(buffer);
+  const workbookXml=await zipEntryText(zip,"xl/workbook.xml"), relsXml=await zipEntryText(zip,"xl/_rels/workbook.xml.rels");
+  if(!workbookXml||!relsXml) throw new Error("Brak struktury skoroszytu XLSX.");
+  const shared=parseSharedStrings(await zipEntryText(zip,"xl/sharedStrings.xml"));
+  const rels=new Map(); let rm; const rr=/<Relationship\b[^>]*\bId="([^"]+)"[^>]*\bTarget="([^"]+)"[^>]*\/?\s*>/g;
+  while((rm=rr.exec(relsXml)))rels.set(rm[1],normalizeZipPath(rm[2]));
+  const sheets=[]; let sm; const sr=/<sheet\b[^>]*\bname="([^"]+)"[^>]*\br:id="([^"]+)"[^>]*\/?\s*>/g;
+  while((sm=sr.exec(workbookXml))){const path=rels.get(sm[2]);if(path)sheets.push({name:xmlDecode(sm[1]),path});}
+  if(!sheets.length)throw new Error("Nie znaleziono arkuszy w pliku.");
+
+  let prodio=null, reference=null;
+  for(const s of sheets){
+    const xml=await zipEntryText(zip,s.path); if(!xml)continue; const cols=findProdioColumns(xml,shared);
+    if(cols&&!prodio) prodio={...s,xml,cols}; else if(!reference){const ref=parseReferenceSheet(xml,shared);if(ref.employees.length>=5)reference={...s,ref};}
+  }
+  if(!prodio)throw new Error("Nie znalazłem arkusza z nagłówkami Pracownik / Start / Stop.");
+  if(reference)mergeImportedConfiguration(reference.ref.employees,reference.ref.absences);
+  const records=parseProdioSheet(prodio.xml,shared,prodio.cols);
+  return {records,meta:{prodioSheet:prodio.name,referenceSheet:reference?.name||"",employees:reference?.ref.employees.length||0,absences:reference?.ref.absences.length||0}};
+}
+
 function parseDelimited(text){
   text=text.replace(/^\uFEFF/,"").trim(); if(!text) return [];
   const first=text.split(/\r?\n/,1)[0]; const delim=first.includes("\t")?"\t":((first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length?";":",");
@@ -138,11 +270,10 @@ function parseDelimited(text){
 async function rowsFromFile(file){
   const ext=(file.name.split(".").pop()||"").toLowerCase();
   if(["xlsx","xlsm"].includes(ext)) return rowsFromExcel(file);
-  return parseDelimited(await file.text());
+  return {records:parseDelimited(await file.text()),meta:{prodioSheet:"CSV/TXT",referenceSheet:"",employees:0,absences:0}};
 }
-function mostCommonMonth(records){
-  const c=new Map(); for(const r of records){ for(const v of [r.start,r.stop]){ const d=parseDateTime(v); if(d){ const k=`${d.getFullYear()}-${pad(d.getMonth()+1)}`; c.set(k,(c.get(k)||0)+1); break; } } }
-  return [...c.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||null;
+function latestMonth(records){
+  let latest=null; for(const r of records){for(const v of [r.start,r.stop]){const d=parseDateTime(v);if(d){const k=`${d.getFullYear()}-${pad(d.getMonth()+1)}`;if(!latest||k>latest)latest=k;break;}}} return latest;
 }
 function addUnknownEmployee(name){
   const n=normalizeName(name); if(!n||employeeByName(n)||!state.autoUnknown) return;
@@ -151,7 +282,10 @@ function addUnknownEmployee(name){
 function processRecords(records,sourceName=""){
   if(!records.length) throw new Error("Brak danych do przeliczenia.");
   rawCount=records.length;
-  const common=mostCommonMonth(records); if(common){ $("#monthInput").value=common; state.month=common; }
+  const latest=latestMonth(records);
+  const selected=$("#monthInput").value||state.month;
+  const selectedHasData=records.some(r=>{const d=parseDateTime(r.start)||parseDateTime(r.stop);return d&&`${d.getFullYear()}-${pad(d.getMonth()+1)}`===selected;});
+  if(latest&&!selectedHasData){$("#monthInput").value=latest;state.month=latest;}
   records.forEach(r=>addUnknownEmployee(r.employee));
   const previous=new Map(state.rows.filter(r=>r.edited||r.absence||r.source==="manual").map(r=>[`${canonical(r.employee)}|${r.date}`,r]));
   state.rows=makeBlankRows(); const {y,m}=getMonthParts();
@@ -175,7 +309,8 @@ function processRecords(records,sourceName=""){
   // Carry forward manual edits/absences from the same month.
   for(const [key,old] of previous){ const r=byKey.get(key); if(!r) continue; if(old.edited||old.source==="manual"){r.start=old.start;r.stop=old.stop;r.edited=old.edited;r.source=old.source;} if(old.absence)r.absence=old.absence; recalcRow(r); }
   state.sourceName=sourceName; state.sunday100=$("#sunday100").checked; state.autoUnknown=$("#autoUnknown").checked; saveAll(); renderAll();
-  setStatus(`Przeliczono ${records.length.toLocaleString("pl-PL")} rekordów. Miesiąc: ${state.month}.`,"ok");
+  const unknown=[...new Set(records.map(r=>normalizeName(r.employee)).filter(n=>n&&(!employeeByName(n)||employeeByName(n).category==="NIEPRZYPISANY")))];
+  setStatus(`Przeliczono ${records.length.toLocaleString("pl-PL")} rekordów · miesiąc ${state.month}${unknown.length?` · ${unknown.length} nazwisk spoza listy pracowników – sprawdź zakładkę 4`:""}.`,unknown.length?"warn":"ok");
 }
 
 function setStatus(txt,type="ok"){ const b=$("#statusBox"); b.textContent=txt; b.className="status-box"+(type==="error"?" error":type==="warn"?" warn":""); }
@@ -285,7 +420,15 @@ function bind(){
   $("#resetEmployees").addEventListener("click",()=>{employees=cloneDefaultEmployees();saveAll();syncRowsWithEmployees();setStatus("Przywrócono konfigurację pracowników z pliku wzorcowego.");});
 }
 async function handleFile(f){
-  try{$("#fileName").textContent=f.name;setStatus(`Czytam ${f.name}…`);const rows=await rowsFromFile(f);processRecords(rows,f.name);}catch(e){console.error(e);setStatus(e.message||"Nie udało się wczytać pliku.","error");}
+  try{
+    $("#fileName").textContent=f.name;setStatus(`Czytam ${f.name}…`);
+    const parsed=await rowsFromFile(f);
+    processRecords(parsed.records,f.name);
+    if(parsed.meta?.prodioSheet){
+      const extra=parsed.meta.referenceSheet?` · pracownicy: „${parsed.meta.referenceSheet}” (${parsed.meta.employees})`:"";
+      setStatus(`${$("#statusBox").textContent} Arkusz Prodio: „${parsed.meta.prodioSheet}”${extra}.`,$("#statusBox").classList.contains("warn")?"warn":"ok");
+    }
+  }catch(e){console.error(e);setStatus(e.message||"Nie udało się wczytać pliku.","error");}
 }
 
 document.addEventListener("DOMContentLoaded",()=>{bind();ensureRows();renderAll();});
