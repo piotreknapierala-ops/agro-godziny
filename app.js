@@ -329,10 +329,23 @@ function renderStats(){
   $("#statRecords").textContent=rawCount.toLocaleString("pl-PL"); $("#statEmployees").textContent=emps.size; $("#statDays").textContent=used.length; $("#statWarnings").textContent=state.rows.filter(r=>["warn","error"].includes(statusForRow(r).type)).length;
 }
 function renderFilters(){
-  const fc=$("#filterCategory"), fe=$("#filterEmployee"); const oldC=fc.value||"ALL", oldE=fe.value||"ALL";
+  const fc=$("#filterCategory"), fe=$("#filterEmployee");
+  const oldC=fc.value||"ALL", oldE=fe.value||"ALL";
+
   fc.innerHTML=`<option value="ALL">Wszystkie</option>`+CATEGORIES.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
-  fe.innerHTML=`<option value="ALL">Wszyscy</option>`+employees.filter(e=>e.active).sort((a,b)=>a.name.localeCompare(b.name,"pl")).map(e=>`<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("");
-  if([...fc.options].some(x=>x.value===oldC))fc.value=oldC; if([...fe.options].some(x=>x.value===oldE))fe.value=oldE;
+  if([...fc.options].some(x=>x.value===oldC)) fc.value=oldC;
+  else fc.value="ALL";
+
+  const selectedCategory=fc.value||"ALL";
+  const visibleEmployees=employees
+    .filter(e=>e.active&&(selectedCategory==="ALL"||e.category===selectedCategory))
+    .sort((a,b)=>a.name.localeCompare(b.name,"pl"));
+
+  fe.innerHTML=`<option value="ALL">Wszyscy</option>`+visibleEmployees
+    .map(e=>`<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("");
+
+  if([...fe.options].some(x=>x.value===oldE)) fe.value=oldE;
+  else fe.value="ALL";
 }
 function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch])); }
 function absenceOptions(selected){ return `<option value="">—</option>`+ABSENCE_CODES.map(x=>`<option value="${escapeHtml(x.code)}" ${x.code===selected?"selected":""}>${escapeHtml(x.code)} — ${escapeHtml(x.label)}</option>`).join(""); }
@@ -422,7 +435,9 @@ function bind(){
   });
   $("#sunday100").addEventListener("change",()=>{state.sunday100=$("#sunday100").checked;state.rows.forEach(recalcRow);saveAll();renderAll();});
   $("#autoUnknown").addEventListener("change",()=>{state.autoUnknown=$("#autoUnknown").checked;saveAll();});
-  ["#filterCategory","#filterEmployee","#filterRows"].forEach(s=>$(s).addEventListener("change",renderRecords));
+  $("#filterCategory").addEventListener("change",()=>{renderFilters();renderRecords();});
+  $("#filterEmployee").addEventListener("change",renderRecords);
+  $("#filterRows").addEventListener("change",renderRecords);
   $("#recordsTable tbody").addEventListener("change",e=>{const tr=e.target.closest("tr[data-id]");if(tr)updateRowFromTr(tr);});
   $("#addManual").addEventListener("click",addManualRow);
   $("#exportTop").addEventListener("click",exportExcel); $("#exportSummary").addEventListener("click",exportExcel);
