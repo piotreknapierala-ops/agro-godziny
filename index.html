@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="AGRO Godziny – szybkie rozliczanie czasu pracy z eksportu Prodio" />
+  <title>AGRO Godziny</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand">AGRO <span>GODZINY</span></div>
+      <div class="subtitle">Prodio → ewidencja czasu → raport Excel</div>
+    </div>
+    <div class="top-actions">
+      <span id="saveState" class="save-state">● gotowe</span>
+      <button class="btn btn-primary" id="exportTop">Eksportuj Excel</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Nawigacja">
+    <button class="tab active" data-tab="import">1. Import</button>
+    <button class="tab" data-tab="records">2. Ewidencja</button>
+    <button class="tab" data-tab="summary">3. Podsumowanie</button>
+    <button class="tab" data-tab="settings">4. Pracownicy i zasady</button>
+  </nav>
+
+  <main>
+    <section id="tab-import" class="panel tab-panel active">
+      <div class="hero-grid">
+        <div class="card">
+          <div class="step">KROK 1</div>
+          <h2>Wybierz miesiąc</h2>
+          <p>Raport zostanie policzony tylko dla wybranego miesiąca.</p>
+          <input type="month" id="monthInput" class="month-input" />
+        </div>
+        <div class="card">
+          <div class="step">KROK 2</div>
+          <h2>Wrzuć eksport Prodio</h2>
+          <p>Możesz wrzucić XLSX/CSV. Jeśli to cały skoroszyt Agro, aplikacja sama wybierze arkusz <b>Historia pracy</b>.</p>
+          <label class="dropzone" id="dropzone">
+            <input type="file" id="fileInput" accept=".xlsx,.xlsm,.csv,.txt" hidden />
+            <strong>Upuść plik tutaj</strong>
+            <span>albo kliknij, żeby wybrać</span>
+          </label>
+          <div id="fileName" class="file-name"></div>
+        </div>
+      </div>
+
+      <div class="card paste-card">
+        <div class="step">ALTERNATYWA</div>
+        <h2>Albo wklej tabelę z Prodio</h2>
+        <p>Skopiuj tabelę z nagłówkami. Wymagane kolumny: <b>Pracownik</b>, <b>Start</b>, <b>Stop</b>.</p>
+        <textarea id="pasteInput" rows="7" placeholder="Pracownik	Start	Stop
+Jan Kowalski	2026-08-03 06:00:00	2026-08-03 14:15:00"></textarea>
+        <div class="row-actions">
+          <button class="btn btn-primary" id="processPaste">Wczytaj wklejone dane</button>
+          <button class="btn btn-secondary" id="clearMonth">Wyczyść bieżący miesiąc</button>
+        </div>
+      </div>
+
+      <div class="stats" id="importStats">
+        <div class="stat"><span>Rekordy Prodio</span><strong id="statRecords">0</strong></div>
+        <div class="stat"><span>Pracownicy z danymi</span><strong id="statEmployees">0</strong></div>
+        <div class="stat"><span>Dni z czasem</span><strong id="statDays">0</strong></div>
+        <div class="stat warning"><span>Do sprawdzenia</span><strong id="statWarnings">0</strong></div>
+      </div>
+      <div id="statusBox" class="status-box">Wybierz plik lub wklej dane z Prodio.</div>
+    </section>
+
+    <section id="tab-records" class="panel tab-panel">
+      <div class="toolbar card">
+        <div>
+          <label>Spółka / dział</label>
+          <select id="filterCategory"></select>
+        </div>
+        <div>
+          <label>Pracownik</label>
+          <select id="filterEmployee"></select>
+        </div>
+        <div>
+          <label>Widok</label>
+          <select id="filterRows">
+            <option value="used">Tylko dni z wpisem</option>
+            <option value="all">Cały miesiąc</option>
+            <option value="warnings">Tylko do sprawdzenia</option>
+            <option value="absence">Tylko nieobecności</option>
+          </select>
+        </div>
+        <div class="toolbar-grow"></div>
+        <button class="btn btn-secondary" id="addManual">+ Dodaj wpis ręczny</button>
+      </div>
+
+      <div class="table-wrap card">
+        <table id="recordsTable">
+          <thead>
+            <tr>
+              <th>Data</th><th>Dzień</th><th>Pracownik</th><th>Spółka / dział</th>
+              <th>Start</th><th>Stop</th><th>Przepracowano</th><th>50%</th><th>100%</th>
+              <th>Nieobecność</th><th>Źródło</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-summary" class="panel tab-panel">
+      <div class="summary-head">
+        <div>
+          <h1>Podsumowanie miesiąca</h1>
+          <p id="summaryMonthLabel"></p>
+        </div>
+        <button class="btn btn-primary" id="exportSummary">Eksportuj raport Excel</button>
+      </div>
+      <div id="categoryCards" class="category-cards"></div>
+      <div class="card table-wrap">
+        <table id="summaryTable">
+          <thead><tr><th>Pracownik</th><th>Spółka / dział</th><th>Godziny</th><th>50%</th><th>100%</th><th>Nieobecności</th><th>Dni z pracą</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-settings" class="panel tab-panel">
+      <div class="settings-grid">
+        <div class="card">
+          <h2>Zasady liczenia</h2>
+          <label class="checkline"><input type="checkbox" id="sunday100" /> Niedzielę licz jak sobotę (100% całego czasu)</label>
+          <p class="hint">Domyślnie wyłączone, aby zachować standardową logikę obecnego pliku: tylko sobota wpada w 100%.</p>
+          <label class="checkline"><input type="checkbox" id="autoUnknown" checked /> Automatycznie dodawaj nowych pracowników znalezionych w Prodio</label>
+          <p class="hint">Nowy pracownik trafia do „NIEPRZYPISANY” i jest oznaczony do sprawdzenia.</p>
+        </div>
+        <div class="card">
+          <h2>Legenda</h2>
+          <p><b>Prodio</b> – aplikacja bierze najwcześniejszy Start i najpóźniejszy Stop danego dnia.</p>
+          <p><b>Ręcznie</b> – godziny wpisujesz sam, tak jak obecnie dla części Magazynu/Serwisu.</p>
+          <p><b>Zaokr. czasu 15 min</b> – odpowiednik obecnego <code>ROUND(...*96)/96</code>.</p>
+          <p><b>Zaokr. Start/Stop 30 min</b> – wyjątek z obecnego pliku dla Denysa Sydorova i Mariusza Durzyńskiego.</p>
+        </div>
+      </div>
+
+      <div class="card table-wrap settings-table-wrap">
+        <div class="settings-actions">
+          <h2>Pracownicy</h2>
+          <button class="btn btn-secondary" id="resetEmployees">Przywróć konfigurację z pliku wzorcowego</button>
+        </div>
+        <table id="employeesTable">
+          <thead><tr><th>Aktywny</th><th>Pracownik</th><th>Spółka / dział</th><th>Źródło godzin</th><th>Zaokr. czasu</th><th>Zaokr. Start/Stop</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>AGRO Godziny · dane przetwarzane lokalnie w przeglądarce</footer>
+</body>
+</html>
